@@ -1,3 +1,4 @@
+require("dotenv").config();
 const express = require("express");
 const path = require("path");
 
@@ -6,7 +7,7 @@ const PORT = process.env.PORT || 3000;
 
 app.use(express.json());
 
-// PUBLIC folder
+// PUBLIC folder ko serve karo
 app.use(express.static(path.join(__dirname, "public")));
 
 // Index.html load
