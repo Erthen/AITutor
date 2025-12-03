@@ -1,28 +1,29 @@
-const chatbox = document.getElementById("chatbox");
-const input = document.getElementById("userInput");
-const btn = document.getElementById("sendBtn");
+document.getElementById("sendBtn").addEventListener("click", sendMessage);
 
-function showMessage(role, text) {
-    const div = document.createElement("div");
-    div.style.margin = "10px 0";
-    div.innerHTML = `<b>${role}:</b> ${text}`;
-    chatbox.appendChild(div);
-    chatbox.scrollTop = chatbox.scrollHeight;
-}
+async function sendMessage() {
+    const input = document.getElementById("userInput");
+    const message = input.value.trim();
+    if (!message) return;
 
-btn.onclick = async () => {
-    const question = input.value.trim();
-    if (!question) return;
-
-    showMessage("You", question);
+    addMessage("You", message);
     input.value = "";
 
-    const response = await fetch("/ask", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ prompt: question })
-    });
+    try {
+        const response = await fetch("https://aitutor-rwfq.onrender.com/api/chat", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ message })
+        });
 
-    const data = await response.json();
-    showMessage("AI", data.answer);
-};
+        const data = await response.json();
+        addMessage("AI", data.reply);
+    } catch (error) {
+        addMessage("AI", "Server error. Please try again.");
+    }
+}
+
+function addMessage(sender, text) {
+    const box = document.getElementById("chatbox");
+    box.innerHTML += `<p><b>${sender}:</b> ${text}</p>`;
+    box.scrollTop = box.scrollHeight;
+}
