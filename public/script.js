@@ -1,6 +1,24 @@
-document.getElementById("sendBtn").onclick = async function () {
-    const question = document.getElementById("userInput").value;
+const chatbox = document.getElementById("chatbox");
+const input = document.getElementById("userInput");
+const btn = document.getElementById("sendBtn");
 
+// Function to show messages
+function showMessage(role, text) {
+    const div = document.createElement("div");
+    div.className = role;
+    div.innerHTML = `<p>${text}</p>`;
+    chatbox.appendChild(div);
+    chatbox.scrollTop = chatbox.scrollHeight;
+}
+
+btn.onclick = async () => {
+    const question = input.value.trim();
+    if (!question) return;
+
+    showMessage("user", question);
+    input.value = "";
+
+    // Send data to backend
     const response = await fetch("/ask", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -8,6 +26,5 @@ document.getElementById("sendBtn").onclick = async function () {
     });
 
     const data = await response.json();
-
-    document.getElementById("answerBox").innerHTML = data.answer;
+    showMessage("bot", data.answer);
 };
