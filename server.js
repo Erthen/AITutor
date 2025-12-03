@@ -1,4 +1,3 @@
-// server.js (replace entire file with this)
 const express = require("express");
 const cors = require("cors");
 const path = require("path");
@@ -7,56 +6,50 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-// Serve static frontend files from public/
+// Serve frontend
 app.use(express.static(path.join(__dirname, "public")));
 
-// Chat route -> forwards to OpenAI
+// Chat API
 app.post("/api/chat", async (req, res) => {
   try {
     const userMessage = req.body.message;
-    if (!userMessage) return res.status(400).json({ error: "No message" });
+    if (!userMessage) return res.json({ reply: "Message missing" });
 
-    // Use your OpenAI API key from env
     const OPENAI_KEY = process.env.OPENAI_API_KEY;
-    if (!OPENAI_KEY) return res.status(500).json({ error: "Missing OPENAI_API_KEY" });
+    if (!OPENAI_KEY) return res.json({ reply: "API key missing" });
 
-    // Prepare request to OpenAI Chat Completions
-    const payload = {
-      model: "gpt-4o-mini", // or choose model you have access to
-      messages: [{ role: "user", content: userMessage }]
-    };
-
-    const r = await fetch("https://api.openai.com/v1/chat/completions", {
+    // Call OpenAI Responses API
+    const response = await fetch("https://api.openai.com/v1/responses", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
         "Authorization": `Bearer ${OPENAI_KEY}`
       },
-      body: JSON.stringify(payload)
+      body: JSON.stringify({
+        model: "gpt-4o-mini",    // use the model you have access to
+        input: userMessage
+      })
     });
 
-    if (!r.ok) {
-      const text = await r.text();
-      console.error("OpenAI error:", r.status, text);
-      return res.status(502).json({ error: "OpenAI error", detail: text });
-    }
+    const data = await response.json();
 
-    const data = await r.json();
-    // pick model response text (safety: check structure)
-    const answer = data?.choices?.[0]?.message?.content ?? "No answer from model";
+    console.log("OpenAI raw response:", data); // DEBUG
 
-    return res.json({ reply: answer });
+    // FIX: Extract correct text
+    const aiReply =
+      data.output_text ||
+      data?.response_text ||
+      data?.choices?.[0]?.message?.content ||
+      "No response text found";
+
+    return res.json({ reply: aiReply });
+
   } catch (err) {
     console.error("Server error:", err);
-    return res.status(500).json({ error: "Server error", detail: err.message });
+    res.json({ reply: "Server error: " + err.message });
   }
 });
 
-// Fallback index route (optional)
-app.get("/", (req, res) => {
-  res.sendFile(path.join(__dirname, "public", "index.html"));
-});
-
-// Start server (Render uses process.env.PORT)
+// Start Server
 const PORT = process.env.PORT || 10000;
-app.listen(PORT, () => console.log("Server running on port", PORT));
+app.listen(PORT, () => console.log("Server running on", PORT));
