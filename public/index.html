@@ -1,20 +1,20 @@
 <!DOCTYPE html>
-import "dotenv/config";
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
+    <meta charset="UTF-8" />
     <title>AI Tutor</title>
-    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="style.css" />
 </head>
+
 <body>
 
-<div id="chatbox" style="height: 400px; overflow-y: auto; border: 1px solid #ccc; padding: 10px;"></div>
+    <div id="chatbox" class="chatbox"></div>
 
-<div class="input-area" style="margin-top: 10px; display: flex; gap: 10px;">
-    <input id="userInput" placeholder="Ask a question..." style="flex: 1; padding: 10px;">
-    <button id="sendBtn" style="padding: 10px;">Send</button>
-</div>
+    <div class="input-area">
+        <input id="userInput" placeholder="Ask a question..." />
+        <button id="sendBtn">Send</button>
+    </div>
 
-<script src="script.js"></script>
+    <script src="script.js"></script>
 </body>
 </html>
