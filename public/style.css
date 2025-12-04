@@ -1,0 +1,28 @@
+body {
+    font-family: Arial, sans-serif;
+    padding: 20px;
+}
+
+.chatbox {
+    height: 400px;
+    overflow-y: auto;
+    border: 1px solid #aaa;
+    padding: 10px;
+    border-radius: 6px;
+}
+
+.input-area {
+    margin-top: 10px;
+    display: flex;
+    gap: 10px;
+}
+
+#userInput {
+    flex: 1;
+    padding: 10px;
+}
+
+#sendBtn {
+    padding: 10px 20px;
+    cursor: pointer;
+}
