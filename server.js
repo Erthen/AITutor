@@ -7,42 +7,32 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-// OpenAI Client
 const client = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY
+    apiKey: process.env.OPENAI_API_KEY
 });
 
-// Chat Route
-app.post("/ask", async (req, res) => {
-  try {
-    const { message } = req.body;
+app.post("/api/chat", async (req, res) => {
+    try {
+        const userMsg = req.body.message;
 
-    // SEND REQUEST TO OPENAI
-    const response = await client.responses.create({
-      model: "gpt-5.1",
-      input: message
-    });
+        const response = await client.responses.create({
+            model: "gpt-5.1",
+            input: userMsg
+        });
 
-    // SAFE PARSING - 100% working
-    let reply = "";
+        // Extract Text from response
+        let aiText = response.output_text;
 
-    if (response.output_text) {
-      reply = response.output_text;
-    } else if (response.output && response.output[0]?.content[0]?.text) {
-      reply = response.output[0].content[0].text;
-    } else {
-      reply = "No response received.";
+        if (!aiText) {
+            aiText = "No response text found";
+        }
+
+        return res.json({ reply: aiText });
+
+    } catch (err) {
+        console.error(err);
+        return res.json({ reply: "Server error occurred!" });
     }
-
-    res.json({ reply });
-
-  } catch (err) {
-    console.error("OPENAI ERROR:", err);
-    res.status(500).json({ reply: "Server error. Please try again." });
-  }
 });
 
-// Start Server
-app.listen(3000, () => {
-  console.log("Server running on http://localhost:3000");
-});
+app.listen(3000, () => console.log("Server running on port 3000"));
