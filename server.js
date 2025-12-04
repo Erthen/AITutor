@@ -1,55 +1,38 @@
-const express = require("express");
-const cors = require("cors");
-const path = require("path");
+import "dotenv/config";
+import express from "express";
+import cors from "cors";
+import OpenAI from "openai";
 
 const app = express();
 app.use(cors());
 app.use(express.json());
 
-// Serve frontend
-app.use(express.static(path.join(__dirname, "public")));
+// Initialize OpenAI
+const client = new OpenAI({
+  apiKey: process.env.OPENAI_API_KEY
+});
 
-// Chat API
+// ===== AI CHAT ROUTE =====
 app.post("/api/chat", async (req, res) => {
   try {
-    const userMessage = req.body.message;
-    if (!userMessage) return res.json({ reply: "Message missing" });
+    const userMessage = req.body.message || "Hello";
 
-    const OPENAI_KEY = process.env.OPENAI_API_KEY;
-    if (!OPENAI_KEY) return res.json({ reply: "API key missing" });
-
-    // Call OpenAI Responses API
-    const response = await fetch("https://api.openai.com/v1/responses", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "Authorization": `Bearer ${OPENAI_KEY}`
-      },
-      body: JSON.stringify({
-        model: "gpt-4o-mini",    // use the model you have access to
-        input: userMessage
-      })
+    const response = await client.responses.create({
+      model: "gpt-5.1",
+      input: userMessage
     });
 
-    const data = await response.json();
+    const aiText = response.output[0].content[0].text;
 
-    console.log("OpenAI raw response:", data); // DEBUG
+    res.json({ reply: aiText });
 
-    // FIX: Extract correct text
-    const aiReply =
-      data.output_text ||
-      data?.response_text ||
-      data?.choices?.[0]?.message?.content ||
-      "No response text found";
-
-    return res.json({ reply: aiReply });
-
-  } catch (err) {
-    console.error("Server error:", err);
-    res.json({ reply: "Server error: " + err.message });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ reply: "AI error" });
   }
 });
 
-// Start Server
-const PORT = process.env.PORT || 10000;
-app.listen(PORT, () => console.log("Server running on", PORT));
+// ===== START SERVER =====
+app.listen(3000, () => {
+  console.log("Server running on http://localhost:3000");
+});
