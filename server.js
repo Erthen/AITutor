@@ -20,7 +20,7 @@ app.post("/api/chat", async (req, res) => {
     const userMessage = req.body.message;
 
     const response = await client.responses.create({
-      model: "gpt-5.1-mini",
+      model: "gpt-o3-mini",
       input: userMessage,
     });
 
@@ -37,3 +37,4 @@ app.post("/api/chat", async (req, res) => {
 app.listen(3000, () => {
   console.log("Server running on port 3000");
 });
+
