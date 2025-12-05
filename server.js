@@ -7,32 +7,33 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
+// Serve Public HTML/CSS/JS
+app.use(express.static("public"));
+
 const client = new OpenAI({
-    apiKey: process.env.OPENAI_API_KEY
+  apiKey: process.env.OPENAI_API_KEY,
 });
 
+// Chat API
 app.post("/api/chat", async (req, res) => {
-    try {
-        const userMsg = req.body.message;
+  try {
+    const userMessage = req.body.message;
 
-        const response = await client.responses.create({
-            model: "gpt-5.1",
-            input: userMsg
-        });
+    const response = await client.responses.create({
+      model: "gpt-5.1-mini",
+      input: userMessage,
+    });
 
-        // Extract Text from response
-        let aiText = response.output_text;
+    const botReply = response.output_text;
 
-        if (!aiText) {
-            aiText = "No response text found";
-        }
-
-        return res.json({ reply: aiText });
-
-    } catch (err) {
-        console.error(err);
-        return res.json({ reply: "Server error occurred!" });
-    }
+    res.json({ reply: botReply });
+  } catch (err) {
+    console.error(err);
+    res.json({ reply: "AI Error! Check API Key or Server." });
+  }
 });
 
-app.listen(3000, () => console.log("Server running on port 3000"));
+// Start Server
+app.listen(3000, () => {
+  console.log("Server running on port 3000");
+});
